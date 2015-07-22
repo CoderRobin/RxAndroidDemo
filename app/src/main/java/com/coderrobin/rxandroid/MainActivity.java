@@ -7,12 +7,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import retrofit.RestAdapter;
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -24,6 +29,7 @@ public class MainActivity extends ActionBarActivity {
         testOrigin();
         testSecond();
         testMap();
+        testNetwork();
     }
 
 
@@ -35,21 +41,21 @@ public class MainActivity extends ActionBarActivity {
                         subscriber.onCompleted();
                     }
                 }).subscribe(new Subscriber<String>() {
-            @Override
-            public void onCompleted() {
-                Log.v(TAG,"testFirst:onCompleted");
-            }
+                @Override
+                public void onCompleted() {
+                    Log.v(TAG, "testFirst:onCompleted");
+                }
 
-            @Override
-            public void onError(Throwable e) {
+                @Override
+                public void onError(Throwable e) {
 
-            }
+                }
 
-            @Override
-            public void onNext(String s) {
-                Log.v(TAG,"onNext:"+s);
-            }
-        });
+                @Override
+                public void onNext(String s) {
+                    Log.v(TAG, "onNext:" + s);
+                }
+            });
 
     }
 
@@ -84,9 +90,44 @@ public class MainActivity extends ActionBarActivity {
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String text) {
-                        Log.v(TAG,text);
+                        Log.v(TAG, text);
                     }
                 });
+    }
+
+
+    public void testNetwork(){
+        Map<String,String> options = new HashMap<>();
+        options.put("q","coderrobin");
+
+        RestAdapter restAdapter = new RestAdapter.Builder()
+                .setEndpoint("https://api.github.com")
+                .build();
+
+        GithubService apiService = restAdapter.create(GithubService.class);
+        apiService.getTopNewAndroidRepos(options)
+                .observeOn(Schedulers.newThread())
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .flatMap(new Func1<GithubResults, Observable<Repo>>() {
+                    @Override
+                    public Observable<Repo> call(GithubResults results) {
+                        Log.v(TAG,results.total_count+"");
+
+                        return Observable.from(results.items);
+                    }
+                }).map(new Func1<Repo, String >() {
+              @Override
+                public String call(Repo repo) {
+                return repo.url;
+            }
+        })
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String url) {
+                        Log.v(TAG, "url:" + url);
+                    }
+                });
+
     }
 
 
