@@ -10,6 +10,4 @@ public class GithubResults {
     ArrayList<Repo> items;
     Integer total_count;
 
-
-
 }

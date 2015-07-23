@@ -73,6 +73,21 @@ public class MainActivity extends ActionBarActivity {
 
     public void testMap(){
 
+        Observable.just("coderrobin").map(new Func1<String, String>() {
+            @Override
+            public String call(String s) {
+                return "hello"+test;
+            }
+        })
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String text) {
+                        Log.v(TAG, text);
+                    }
+                });
+    }
+
+    private void testFlatMap(){
         Observable.just("coderrobin").map(new Func1<String, List>() {
             @Override
             public List<String> call(String s) {
@@ -95,6 +110,21 @@ public class MainActivity extends ActionBarActivity {
                 });
     }
 
+    public void testFilter(){
+        Observable.just(1,2,3,4,5).filter(new Func1<Integer, Boolean>() {
+            @Override
+            public Boolean call(Integer integer) {
+                return integer>3;
+            }
+        })
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer num) {
+                        Log.v(TAG, num+"");
+                    }
+                });
+    }
+
 
     public void testNetwork(){
         Map<String,String> options = new HashMap<>();
@@ -103,7 +133,6 @@ public class MainActivity extends ActionBarActivity {
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint("https://api.github.com")
                 .build();
-
         GithubService apiService = restAdapter.create(GithubService.class);
         apiService.getTopNewAndroidRepos(options)
                 .observeOn(Schedulers.newThread())
